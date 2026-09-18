@@ -279,13 +279,6 @@ export default function Header() {
             {/* CTAs */}
             <div className="hidden lg:flex items-center gap-4">
               <Link
-                href="/admin/dashboard"
-                className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-blue transition-colors duration-200"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Admin
-              </Link>
-              <Link
                 href="/contact"
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-primary-blue hover:bg-opacity-90 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >

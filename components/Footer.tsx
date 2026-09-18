@@ -22,7 +22,7 @@ export default function Footer() {
     { name: 'Tour Packages', href: '/packages' },
     { name: 'About Us', href: '/about' },
     { name: 'Contact Us', href: '/contact' },
-    { name: 'Admin Portal', href: '/admin/dashboard' },
+    // { name: 'Admin Portal', href: '/admin/dashboard' },
   ];
 
   return (
