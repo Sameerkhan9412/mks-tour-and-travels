@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star, Clock, MapPin, ArrowUpRight } from 'lucide-react';
+import { Star, Clock, MapPin, Compass, Sparkles } from 'lucide-react';
 
 interface DestinationInfo {
   name: string;
@@ -16,7 +16,7 @@ interface PackageData {
   slug: string;
   description: string;
   duration: string;
-  price: number;
+  price?: number;
   regularPrice?: number;
   rating: number;
   images: string[];
@@ -29,13 +29,6 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
     pkg.destination && typeof pkg.destination === 'object'
       ? pkg.destination.name
       : 'Popular Destination';
-
-  // Format price
-  const formattedPrice = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(pkg.price);
 
   return (
     <motion.div
@@ -89,28 +82,22 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
           {pkg.description}
         </p>
 
-        {/* Price and Action Button */}
-        <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-auto">
-          <div>
-            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-              From
-            </span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-extrabold text-slate-900">
-                {formattedPrice}
-              </span>
-              {pkg.regularPrice && (
-                <span className="text-xs font-semibold text-slate-400 line-through">
-                  ₹{pkg.regularPrice.toLocaleString('en-IN')}
-                </span>
-              )}
-            </div>
-          </div>
+        {/* Action Buttons: Explore More & Get Quote */}
+        <div className="grid grid-cols-2 gap-2.5 border-t border-slate-100 pt-4 mt-auto">
           <Link
             href={`/packages/${pkg.slug}`}
-            className="flex items-center justify-center w-11 h-11 rounded-full bg-slate-50 border border-slate-200 group-hover:bg-primary-blue group-hover:border-primary-blue text-slate-700 group-hover:text-white transition-all duration-300 shadow-sm"
+            className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all duration-200 border border-slate-200/80 shadow-2xs group-hover:border-slate-300"
           >
-            <ArrowUpRight className="w-5 h-5" />
+            <Compass className="w-3.5 h-3.5 text-primary-blue" />
+            <span>Explore More</span>
+          </Link>
+
+          <Link
+            href={`/contact?category=${encodeURIComponent(pkg.category)}&package=${encodeURIComponent(pkg.slug)}&packageName=${encodeURIComponent(pkg.name)}`}
+            className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-primary-blue hover:bg-blue-800 text-white font-bold text-xs transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-accent-gold" />
+            <span>Get Quote</span>
           </Link>
         </div>
       </div>

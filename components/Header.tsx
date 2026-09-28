@@ -25,7 +25,7 @@ const defaultCategories: CategoryItem[] = [
   {
     name: 'Kashmir',
     slug: 'kashmir',
-    image: 'https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=300&q=80',
+    image: 'https://plus.unsplash.com/premium_photo-1697730321309-0389da6f762b?q=80',
   },
   {
     name: 'Himachal Pradesh',
@@ -60,12 +60,12 @@ const defaultCategories: CategoryItem[] = [
   {
     name: 'Kerala',
     slug: 'kerala',
-    image: 'https://images.unsplash.com/photo-1602216056096-3c40cc0c9944?auto=format&fit=crop&w=300&q=80',
+    image: 'https://plus.unsplash.com/premium_photo-1697729438401-fcb4ff66d9a8?q=80',
   },
   {
     name: 'Sikkim',
     slug: 'sikkim',
-    image: 'https://images.unsplash.com/photo-1622308644420-a75d5069f1d0?auto=format&fit=crop&w=300&q=80',
+    image: 'https://plus.unsplash.com/premium_photo-1697729690458-2d64ca777c04?q=80&w=1170',
   },
 ];
 
@@ -201,9 +201,6 @@ export default function Header() {
                         <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                           India Tour Categories
                         </span>
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                          <Sparkles className="w-3 h-3" /> 100% India
-                        </span>
                       </div>
 
                       <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-50 pr-1">
@@ -279,11 +276,11 @@ export default function Header() {
             {/* CTAs */}
             <div className="hidden lg:flex items-center gap-4">
               <Link
-                href="/contact"
+                href="tel:+916398232370"
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-primary-blue hover:bg-opacity-90 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
               >
                 <PhoneCall className="w-4 h-4 text-accent-gold" />
-                Plan My Trip
+                916398232370
               </Link>
             </div>
 

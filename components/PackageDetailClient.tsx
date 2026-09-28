@@ -130,9 +130,11 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         destination: pkg.name,
-        budget: pkg.price,
+        category: pkg.category,
+        packageName: pkg.name,
+        packageSlug: pkg.slug,
         travelersCount: 2,
-        notes: `Discount inquiry for ${pkg.name} (${pkg.duration})`,
+        notes: `Quote inquiry for ${pkg.name} (${pkg.duration})`,
       };
 
       const res = await axios.post('/api/inquiries', payload);
@@ -155,7 +157,7 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
   const triggerWhatsApp = () => {
     const phone = '919805400248';
     const text = encodeURIComponent(
-      `Hi MSK Holiday's, I want a discount on "${pkg.name}" (Price: ₹${pkg.price}). Please share the best offer and itinerary.`
+      `Hi MSK Holiday's, I am interested in the "${pkg.name}" tour package. Please share the detailed itinerary and best quotation.`
     );
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
@@ -259,29 +261,37 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
               </p>
             </div>
 
-            {/* Pricing Box (Right side matching screenshot) */}
+            {/* Quotation Box */}
             <div className="lg:col-span-4 bg-white/95 backdrop-blur-md rounded-2xl p-6 text-slate-800 shadow-2xl border border-white">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                From
+                Tour Pricing
               </span>
-              <div className="flex items-baseline gap-3 my-1">
-                <span className="text-3xl font-black text-slate-900 tracking-tight">
-                  {pkg.price.toLocaleString('en-IN')} /-
+              <div className="my-2">
+                <span className="text-xl sm:text-2xl font-black text-primary-blue tracking-tight block">
+                  Best Quote on Request
                 </span>
-                {pkg.regularPrice && (
-                  <span className="text-base font-bold text-slate-400 line-through">
-                    {pkg.regularPrice.toLocaleString('en-IN')} /-
-                  </span>
-                )}
+                <span className="text-xs text-slate-500 font-medium">
+                  Customized itinerary &amp; transparent quotation
+                </span>
               </div>
 
-              {/* Want A Discount Button (Green button in screenshot) */}
-              <button
-                onClick={scrollToDiscountForm}
-                className="w-full mt-3 py-3 px-6 bg-[#6bc400] hover:bg-[#5eb000] text-white font-extrabold text-sm rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 uppercase tracking-wide cursor-pointer"
-              >
-                Want A Discount ??
-              </button>
+              {/* Get Quote & Plan buttons */}
+              <div className="flex flex-col gap-2 mt-4">
+                <Link
+                  href={`/contact?category=${encodeURIComponent(pkg.category)}&package=${encodeURIComponent(pkg.slug)}&packageName=${encodeURIComponent(pkg.name)}`}
+                  className="w-full py-3 px-5 bg-primary-blue hover:bg-blue-800 text-white font-extrabold text-sm rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 uppercase tracking-wide cursor-pointer text-center"
+                >
+                  <Sparkles className="w-4 h-4 text-accent-gold" />
+                  Get Customized Quote
+                </Link>
+
+                <button
+                  onClick={scrollToDiscountForm}
+                  className="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Quick Inquiry Form ↓
+                </button>
+              </div>
             </div>
           </div>
         </div>

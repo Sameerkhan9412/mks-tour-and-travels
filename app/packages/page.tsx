@@ -97,7 +97,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   let packagesList: any[] = [];
 
   const resolvedParams = await searchParams;
-  const { destination, category, minPrice, maxPrice, duration, domestic, sort } = resolvedParams;
+  const { destination, category, duration, domestic, sort } = resolvedParams;
 
   try {
     await connectToDatabase();
@@ -135,14 +135,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
       }
     }
 
-    // 3. Price filter
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
-    }
-
-    // 4. Duration filter
+    // 3. Duration filter
     if (duration && duration !== 'all') {
       if (duration === 'short') {
         query.durationDays = { $lte: 4 };
@@ -155,14 +148,14 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
 
     // Determine Sort options
     let sortQuery: any = { featured: -1, createdAt: -1 };
-    if (sort === 'priceAsc') {
-      sortQuery = { price: 1 };
-    } else if (sort === 'priceDesc') {
-      sortQuery = { price: -1 };
+    if (sort === 'durationAsc') {
+      sortQuery = { durationDays: 1, createdAt: -1 };
+    } else if (sort === 'durationDesc') {
+      sortQuery = { durationDays: -1, createdAt: -1 };
     } else if (sort === 'latest') {
       sortQuery = { createdAt: -1 };
     } else if (sort === 'popular') {
-      sortQuery = { rating: -1, price: 1 };
+      sortQuery = { rating: -1, createdAt: -1 };
     }
 
     if (!destination || query.destination) {
@@ -182,7 +175,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   const cleanDestinations = JSON.parse(JSON.stringify(destinationsList));
 
   // Fallback if DB is empty and user is browsing
-  if (cleanPackages.length === 0 && !destination && (!category || category === 'all') && !minPrice && !maxPrice) {
+  if (cleanPackages.length === 0 && !destination && (!category || category === 'all')) {
     cleanPackages = defaultFallbackPackages;
   } else if (cleanPackages.length === 0 && category && category !== 'all') {
     cleanPackages = defaultFallbackPackages.filter(

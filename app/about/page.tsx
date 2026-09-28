@@ -91,7 +91,7 @@ export default function AboutPage() {
       <section className="relative pt-32 pb-24 text-white text-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=1920&q=85"
+            src="https://images.unsplash.com/photo-1607068891828-f16297950a66?q=80"
             alt="Scenic India Mountains"
             fill
             priority
@@ -270,7 +270,7 @@ export default function AboutPage() {
             <div className="lg:col-span-5 grid grid-cols-2 gap-4">
               <div className="relative h-56 rounded-2xl overflow-hidden shadow-sm group">
                 <Image
-                  src="https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=600&q=80"
+                  src="https://images.unsplash.com/photo-1627894485200-b92fb4353967?q=80"
                   alt="Kashmir Valley"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -282,7 +282,7 @@ export default function AboutPage() {
 
               <div className="relative h-56 rounded-2xl overflow-hidden shadow-sm group mt-6">
                 <Image
-                  src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80"
+                  src="https://images.unsplash.com/photo-1579531403068-8d6fd2b3f45d?q=80&w=1112&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA"
                   alt="Spiti Valley"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -294,7 +294,7 @@ export default function AboutPage() {
 
               <div className="relative h-56 rounded-2xl overflow-hidden shadow-sm group -mt-6">
                 <Image
-                  src="https://images.unsplash.com/photo-1602216056096-3c40cc0c9944?auto=format&fit=crop&w=600&q=80"
+                  src="https://plus.unsplash.com/premium_photo-1697729438401-fcb4ff66d9a8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="Kerala Backwaters"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"

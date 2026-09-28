@@ -17,8 +17,6 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
   const [category, setCategory] = useState(searchParams.get('category') || 'all');
   const [domestic, setDomestic] = useState(searchParams.get('domestic') || 'all');
   const [duration, setDuration] = useState(searchParams.get('duration') || 'all');
-  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
   const [sort, setSort] = useState(searchParams.get('sort') || 'popular');
 
   // Sync state if URL changes externally
@@ -27,8 +25,6 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
     setCategory(searchParams.get('category') || 'all');
     setDomestic(searchParams.get('domestic') || 'all');
     setDuration(searchParams.get('duration') || 'all');
-    setMinPrice(searchParams.get('minPrice') || '');
-    setMaxPrice(searchParams.get('maxPrice') || '');
     setSort(searchParams.get('sort') || 'popular');
   }, [searchParams]);
 
@@ -39,8 +35,6 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
     if (category && category !== 'all') params.set('category', category);
     if (domestic && domestic !== 'all') params.set('domestic', domestic);
     if (duration && duration !== 'all') params.set('duration', duration);
-    if (minPrice) params.set('minPrice', minPrice);
-    if (maxPrice) params.set('maxPrice', maxPrice);
     if (sort) params.set('sort', sort);
 
     router.push(`/packages?${params.toString()}`, { scroll: false });
@@ -51,8 +45,6 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
     setCategory('all');
     setDomestic('all');
     setDuration('all');
-    setMinPrice('');
-    setMaxPrice('');
     setSort('popular');
     router.push('/packages');
   };
@@ -66,7 +58,7 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
         </h3>
         <button
           onClick={handleClear}
-          className="text-xs font-bold text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+          className="text-xs font-bold text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors cursor-pointer"
         >
           <RefreshCw className="w-3 h-3" />
           Clear All
@@ -127,28 +119,6 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
         </select>
       </div>
 
-      {/* Budget range */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Price Range (₹)</label>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            placeholder="Min"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-700"
-          />
-          <span className="text-slate-400 text-xs">-</span>
-          <input
-            type="number"
-            placeholder="Max"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-700"
-          />
-        </div>
-      </div>
-
       {/* Sorting select */}
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1">
@@ -161,8 +131,8 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
         >
           <option value="popular">Popularity</option>
           <option value="latest">Latest Packages</option>
-          <option value="priceAsc">Price: Low to High</option>
-          <option value="priceDesc">Price: High to Low</option>
+          <option value="durationAsc">Duration: Short to Long</option>
+          <option value="durationDesc">Duration: Long to Short</option>
         </select>
       </div>
 

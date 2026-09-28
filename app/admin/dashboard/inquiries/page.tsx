@@ -10,6 +10,8 @@ interface InquiryData {
   email: string;
   phoneNumber: string;
   destination: string;
+  category?: string;
+  packageName?: string;
   travelDate: string;
   budget: number;
   travelersCount: number;
@@ -197,8 +199,15 @@ export default function InquiriesAdminPage() {
                         <span className="text-[10px] text-slate-400 font-semibold">{inq.phoneNumber}</span>
                       </div>
                     </td>
-                    <td className="p-4 sm:p-5 text-slate-600 font-semibold truncate max-w-[150px]">
-                      {inq.destination}
+                    <td className="p-4 sm:p-5 text-slate-600 font-semibold max-w-[180px]">
+                      <div className="truncate">
+                        <span className="block truncate">{inq.packageName || inq.destination}</span>
+                        {inq.category && (
+                          <span className="inline-block text-[10px] text-primary-blue bg-primary-blue/10 px-1.5 py-0.5 rounded font-bold capitalize mt-0.5">
+                            {inq.category}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4 sm:p-5 text-slate-500">
                       {inq.travelDate}
@@ -272,9 +281,19 @@ export default function InquiriesAdminPage() {
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-4 bg-slate-50 p-4 rounded-2xl">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Submitted Destination</span>
-                <p className="text-sm font-bold text-slate-700 mt-1">{selectedInquiry.destination}</p>
+              <div className="border-t border-slate-100 pt-4 bg-slate-50 p-4 rounded-2xl space-y-2">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Tour Plan / Package</span>
+                  <p className="text-sm font-black text-slate-800 mt-0.5">{selectedInquiry.packageName || selectedInquiry.destination}</p>
+                </div>
+                {selectedInquiry.category && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Category</span>
+                    <span className="inline-block text-xs font-bold text-primary-blue bg-primary-blue/10 px-2 py-0.5 rounded capitalize mt-0.5">
+                      {selectedInquiry.category}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Form updates */}

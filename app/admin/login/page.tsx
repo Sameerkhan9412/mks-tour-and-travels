@@ -9,7 +9,7 @@ import axios from 'axios';
 import { Globe, Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = zod.object({
-  email: zod.string().email('Please enter a valid email address'),
+  email: zod.string().min(1, 'Please enter your username or email address'),
   password: zod.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -86,14 +86,14 @@ export default function AdminLoginPage() {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Email */}
+            {/* Email / Username */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Mail className="w-3.5 h-3.5 text-secondary-sky" /> Email Address
+                <Mail className="w-3.5 h-3.5 text-secondary-sky" /> Email Address or Username
               </label>
               <input
-                type="email"
-                placeholder="admin@email.com"
+                type="text"
+                placeholder="admin@mskholidays.com or admin"
                 {...register('email')}
                 className={`w-full px-4 py-3 rounded-xl bg-slate-950/60 border text-sm text-white focus:outline-none focus:border-primary-blue transition-all ${
                   errors.email ? 'border-red-500' : 'border-slate-800'

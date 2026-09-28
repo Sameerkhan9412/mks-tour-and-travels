@@ -25,7 +25,7 @@ const defaultCategories = [
     _id: 'c2',
     name: 'Kashmir',
     slug: 'kashmir',
-    image: 'https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1715457573748-8e8a70b2c1be?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     description: 'Paradise on Earth, Dal Lake & Gulmarg',
   },
   {
@@ -74,14 +74,14 @@ const defaultCategories = [
     _id: 'c9',
     name: 'Kerala',
     slug: 'kerala',
-    image: 'https://images.unsplash.com/photo-1602216056096-3c40cc0c9944?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     description: "God's Own Country, Backwaters & Munnar Hills",
   },
   {
     _id: 'c10',
     name: 'Sikkim',
     slug: 'sikkim',
-    image: 'https://images.unsplash.com/photo-1622308644420-a75d5069f1d0?auto=format&fit=crop&w=800&q=80',
+    image: 'https://plus.unsplash.com/premium_photo-1697729690458-2d64ca777c04?q=80&w=1170',
     description: 'Kanchenjunga Vistas & Buddhist Monasteries',
   },
 ];
