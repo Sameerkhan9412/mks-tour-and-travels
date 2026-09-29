@@ -85,6 +85,7 @@ function ContactFormInner() {
   const paramPackageName = searchParams.get('packageName') || '';
 
   const [availablePackages, setAvailablePackages] = useState<Array<{ _id: string; name: string; slug: string; category: string }>>([]);
+  const [categories, setCategories] = useState<Array<{ slug: string; name: string }>>(categoriesList);
   const [loadingPackages, setLoadingPackages] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -103,22 +104,30 @@ function ContactFormInner() {
   const [submittedEmail, setSubmittedEmail] = useState('');
   const [submittedPlan, setSubmittedPlan] = useState('');
 
-  // Fetch all packages to populate tour plan dropdown dynamically
+  // Fetch dynamic categories and packages to populate dropdowns from API
   useEffect(() => {
-    async function loadPackages() {
+    async function loadData() {
       setLoadingPackages(true);
       try {
-        const res = await axios.get('/api/packages');
-        if (res.data.success && Array.isArray(res.data.packages)) {
-          setAvailablePackages(res.data.packages);
+        const [pkgsRes, catsRes] = await Promise.allSettled([
+          axios.get('/api/packages'),
+          axios.get('/api/categories'),
+        ]);
+
+        if (pkgsRes.status === 'fulfilled' && pkgsRes.value.data?.success && Array.isArray(pkgsRes.value.data.packages)) {
+          setAvailablePackages(pkgsRes.value.data.packages);
+        }
+
+        if (catsRes.status === 'fulfilled' && catsRes.value.data?.categories && Array.isArray(catsRes.value.data.categories)) {
+          setCategories(catsRes.value.data.categories);
         }
       } catch (err) {
-        console.error('Failed to load packages in contact form:', err);
+        console.error('Failed to load data in contact form:', err);
       } finally {
         setLoadingPackages(false);
       }
     }
-    loadPackages();
+    loadData();
   }, []);
 
   // Sync URL query params if they change
@@ -403,7 +412,7 @@ function ContactFormInner() {
                     className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-800 bg-white font-medium"
                     required
                   >
-                    {categoriesList.map((cat) => (
+                    {categories.map((cat) => (
                       <option key={cat.slug} value={cat.slug}>
                         {cat.name}
                       </option>

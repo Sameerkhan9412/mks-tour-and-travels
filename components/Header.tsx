@@ -15,66 +15,16 @@ interface CategoryItem {
   image: string;
 }
 
-// Default 10 Indian Tour Categories from the user screenshot
-const defaultCategories: CategoryItem[] = [
-  {
-    name: 'Uttarakhand',
-    slug: 'uttarakhand',
-    image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Kashmir',
-    slug: 'kashmir',
-    image: 'https://plus.unsplash.com/premium_photo-1697730321309-0389da6f762b?q=80',
-  },
-  {
-    name: 'Himachal Pradesh',
-    slug: 'himachal-pradesh',
-    image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Goa',
-    slug: 'goa',
-    image: 'https://images.unsplash.com/photo-1512100356356-de1b84283e18?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Rajasthan',
-    slug: 'rajasthan',
-    image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Ladakh',
-    slug: 'ladakh',
-    image: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Spiti',
-    slug: 'spiti',
-    image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Andaman & Nicobar',
-    slug: 'andaman-nicobar',
-    image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?auto=format&fit=crop&w=300&q=80',
-  },
-  {
-    name: 'Kerala',
-    slug: 'kerala',
-    image: 'https://plus.unsplash.com/premium_photo-1697729438401-fcb4ff66d9a8?q=80',
-  },
-  {
-    name: 'Sikkim',
-    slug: 'sikkim',
-    image: 'https://plus.unsplash.com/premium_photo-1697729690458-2d64ca777c04?q=80&w=1170',
-  },
-];
+interface HeaderProps {
+  initialCategories?: CategoryItem[];
+}
 
-export default function Header() {
+export default function Header({ initialCategories = [] }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobilePackagesOpen, setIsMobilePackagesOpen] = useState(false);
-  const [categories, setCategories] = useState<CategoryItem[]>(defaultCategories);
+  const [categories, setCategories] = useState<CategoryItem[]>(initialCategories);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
 
@@ -90,19 +40,30 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch dynamic categories if available
+  // Sync with initialCategories if passed/updated from server
   useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      setCategories(initialCategories);
+    }
+  }, [initialCategories]);
+
+  // Fetch dynamic categories directly from backend /api/categories for real-time updates
+  useEffect(() => {
+    let isMounted = true;
     const fetchCats = async () => {
       try {
         const res = await axios.get('/api/categories');
-        if (res.data.categories && res.data.categories.length > 0) {
+        if (isMounted && res.data?.categories) {
           setCategories(res.data.categories);
         }
       } catch (err) {
-        // Fallback to default 10 Indian categories
+        console.error('Failed to load categories in header from API:', err);
       }
     };
     fetchCats();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleMouseEnter = () => {
@@ -204,26 +165,38 @@ export default function Header() {
                       </div>
 
                       <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-50 pr-1">
-                        {categories.map((cat, idx) => (
-                          <Link
-                            key={cat.slug || idx}
-                            href={`/packages?category=${cat.slug}`}
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
-                          >
-                            <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-inner bg-slate-100 group-hover:scale-105 transition-transform duration-200">
-                              <Image src={cat.image} alt={cat.name} fill className="object-cover" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <span className="block text-xs font-bold text-slate-800 group-hover:text-primary-blue transition-colors truncate">
-                                {cat.name}
-                              </span>
-                              <span className="block text-[10px] text-slate-400">
-                                Explore tour packages
-                              </span>
-                            </div>
-                          </Link>
-                        ))}
+                        {categories.length > 0 ? (
+                          categories.map((cat, idx) => (
+                            <Link
+                              key={cat.slug || cat._id || idx}
+                              href={`/packages?category=${cat.slug}`}
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                            >
+                              <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-inner bg-slate-100 group-hover:scale-105 transition-transform duration-200">
+                                {cat.image ? (
+                                  <Image src={cat.image} alt={cat.name} fill className="object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
+                                    <Globe className="w-5 h-5" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <span className="block text-xs font-bold text-slate-800 group-hover:text-primary-blue transition-colors truncate">
+                                  {cat.name}
+                                </span>
+                                <span className="block text-[10px] text-slate-400">
+                                  Explore tour packages
+                                </span>
+                              </div>
+                            </Link>
+                          ))
+                        ) : (
+                          <div className="py-8 text-center text-xs text-slate-400 font-medium">
+                            Loading tour categories...
+                          </div>
+                        )}
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 mt-1 px-1">

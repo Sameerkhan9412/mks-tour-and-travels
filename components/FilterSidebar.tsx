@@ -2,28 +2,52 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SlidersHorizontal, RefreshCw, Eye, ArrowUpDown, Calendar, Map, CheckCircle2 } from 'lucide-react';
+import { SlidersHorizontal, RefreshCw, ArrowUpDown } from 'lucide-react';
+import axios from 'axios';
 
-interface FilterSidebarProps {
-  destinationsList: Array<{ _id: string; name: string; slug: string }>;
+interface CategoryItem {
+  _id?: string;
+  name: string;
+  slug: string;
 }
 
-export default function FilterSidebar({ destinationsList }: FilterSidebarProps) {
+interface FilterSidebarProps {
+  categoriesList?: CategoryItem[];
+}
+
+export default function FilterSidebar({ categoriesList = [] }: FilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Dynamic categories state initialized from server props
+  const [categories, setCategories] = useState<CategoryItem[]>(categoriesList);
+
   // Local state to keep track of fields
-  const [destination, setDestination] = useState(searchParams.get('destination') || '');
   const [category, setCategory] = useState(searchParams.get('category') || 'all');
-  const [domestic, setDomestic] = useState(searchParams.get('domestic') || 'all');
   const [duration, setDuration] = useState(searchParams.get('duration') || 'all');
   const [sort, setSort] = useState(searchParams.get('sort') || 'popular');
 
+  // Update categories whenever server props change or fetch directly from DB API
+  useEffect(() => {
+    if (categoriesList && categoriesList.length > 0) {
+      setCategories(categoriesList);
+    }
+
+    axios
+      .get('/api/categories')
+      .then((res) => {
+        if (res.data?.categories && res.data.categories.length > 0) {
+          setCategories(res.data.categories);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load dynamic categories in filter:', err);
+      });
+  }, [categoriesList]);
+
   // Sync state if URL changes externally
   useEffect(() => {
-    setDestination(searchParams.get('destination') || '');
     setCategory(searchParams.get('category') || 'all');
-    setDomestic(searchParams.get('domestic') || 'all');
     setDuration(searchParams.get('duration') || 'all');
     setSort(searchParams.get('sort') || 'popular');
   }, [searchParams]);
@@ -31,9 +55,7 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
   const applyFilters = () => {
     const params = new URLSearchParams();
 
-    if (destination) params.set('destination', destination);
     if (category && category !== 'all') params.set('category', category);
-    if (domestic && domestic !== 'all') params.set('domestic', domestic);
     if (duration && duration !== 'all') params.set('duration', duration);
     if (sort) params.set('sort', sort);
 
@@ -41,9 +63,7 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
   };
 
   const handleClear = () => {
-    setDestination('');
     setCategory('all');
-    setDomestic('all');
     setDuration('all');
     setSort('popular');
     router.push('/packages');
@@ -65,24 +85,7 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
         </button>
       </div>
 
-      {/* Destination select */}
-      <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Destination</label>
-        <select
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-700 bg-white"
-        >
-          <option value="">All Destinations</option>
-          {destinationsList.map((dest) => (
-            <option key={dest._id} value={dest.slug}>
-              {dest.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Category select */}
+      {/* Dynamic Category select */}
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Category</label>
         <select
@@ -91,16 +94,11 @@ export default function FilterSidebar({ destinationsList }: FilterSidebarProps) 
           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-700 bg-white"
         >
           <option value="all">All Tour Categories</option>
-          <option value="uttarakhand">Uttarakhand</option>
-          <option value="kashmir">Kashmir</option>
-          <option value="himachal-pradesh">Himachal Pradesh</option>
-          <option value="goa">Goa</option>
-          <option value="rajasthan">Rajasthan</option>
-          <option value="ladakh">Ladakh</option>
-          <option value="spiti">Spiti</option>
-          <option value="andaman-nicobar">Andaman & Nicobar</option>
-          <option value="kerala">Kerala</option>
-          <option value="sikkim">Sikkim</option>
+          {categories.map((cat) => (
+            <option key={cat.slug || cat._id} value={cat.slug}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 

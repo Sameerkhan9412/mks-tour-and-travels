@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
       isDomestic,
     } = data;
 
-    if (!name || !description || !duration || !durationDays || !price || !category) {
+    if (!name || !description || !duration || !durationDays || !category) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
       description: description.trim(),
       duration: duration.trim(),
       durationDays: Number(durationDays),
-      price: Number(price),
+      price: price ? Number(price) : 0,
       regularPrice: regularPrice ? Number(regularPrice) : undefined,
       rating: rating ? Number(rating) : 5,
       images: images || [],

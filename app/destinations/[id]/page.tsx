@@ -143,19 +143,22 @@ export default async function DestinationDetailPage({ params }: DestinationPageP
 
   try {
     await connectToDatabase();
-    dest = await Destination.findOne({
+    const rawDest = await Destination.findOne({
       $or: [{ _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : undefined }, { slug: id.toLowerCase() }]
     }).lean();
 
-    if (dest) {
-      relatedPkgs = await Package.find({ destination: dest._id })
+    if (rawDest) {
+      dest = JSON.parse(JSON.stringify(rawDest));
+      const rawRelated = await Package.find({ destination: dest._id })
         .populate('destination')
         .lean();
+      relatedPkgs = JSON.parse(JSON.stringify(rawRelated));
 
       // Find hotels that contain destination name in their location
-      matchingHotels = await Hotel.find({
+      const rawHotels = await Hotel.find({
         location: { $regex: new RegExp(dest.name, 'i') }
       }).lean();
+      matchingHotels = JSON.parse(JSON.stringify(rawHotels));
     }
   } catch (error) {
     console.error('Database fetch error in destination detail page:', error);

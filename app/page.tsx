@@ -11,6 +11,10 @@ import HeroSection from '@/components/HeroSection';
 import PackageCard from '@/components/PackageCard';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import { BadgePercent, Headset, ShieldCheck, HeartHandshake, ArrowRight, Sparkles, MapPin, Compass } from 'lucide-react';
+import { fetchCategoriesFromApi } from '@/lib/api/categories';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Default 10 Indian Tour Categories fallback
 const defaultCategories = [
@@ -97,7 +101,7 @@ const mockPackages = [
     price: 18000,
     regularPrice: 22000,
     rating: 4.9,
-    images: ['https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=800&q=85'],
+    images: ['https://images.unsplash.com/photo-1715457573748-8e8a70b2c1be?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'],
     category: 'kashmir',
   },
   {
@@ -164,12 +168,16 @@ export default async function HomePage() {
   let testimonials: any[] = [];
 
   try {
+    // Fetch categories dynamically from /api/categories API endpoint
+    categories = await fetchCategoriesFromApi();
+
     await connectToDatabase();
-    categories = await Category.find().sort({ order: 1, name: 1 }).lean();
-    packages = await Package.find({ featured: true }).sort({ createdAt: -1 }).limit(6).lean();
-    testimonials = await Testimonial.find().limit(5).lean();
+    const rawPackages = await Package.find({ featured: true }).sort({ createdAt: -1 }).limit(6).lean();
+    packages = JSON.parse(JSON.stringify(rawPackages));
+    const rawTestimonials = await Testimonial.find().limit(5).lean();
+    testimonials = JSON.parse(JSON.stringify(rawTestimonials));
   } catch (error) {
-    console.error('Database fetch error in homepage, using mock data:', error);
+    console.error('Data fetch error in homepage, using mock data:', error);
   }
 
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
@@ -179,8 +187,8 @@ export default async function HomePage() {
   const features = [
     {
       icon: <BadgePercent className="w-8 h-8 text-accent-gold" />,
-      title: 'Best Price Guarantee',
-      desc: 'Direct partnerships with local Indian hoteliers and drivers mean transparent rates with no hidden fees.',
+      title: 'Best Quote Guarantee',
+      desc: 'Direct partnerships with local Indian hoteliers and drivers mean transparent customized quotes with no hidden fees.',
     },
     {
       icon: <Headset className="w-8 h-8 text-secondary-sky" />,

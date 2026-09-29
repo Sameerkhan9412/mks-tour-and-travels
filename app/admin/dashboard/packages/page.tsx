@@ -3,7 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
-import { Plus, Edit2, Trash2, Save, Compass, CheckCircle2, AlertCircle, X, MapPin, Layers } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Save,
+  Compass,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  MapPin,
+  Layers,
+  UploadCloud,
+  Loader2,
+  Image as ImageIcon,
+} from 'lucide-react';
 
 interface ItineraryItem {
   day: number;
@@ -13,7 +28,7 @@ interface ItineraryItem {
 }
 
 interface PlaceYouWillSee {
-  name: string;
+  name?: string;
   image: string;
 }
 
@@ -92,6 +107,13 @@ export default function PackagesAdminPage() {
   const [regularPrice, setRegularPrice] = useState<number | ''>(22000);
   const [rating, setRating] = useState(5);
   const [imageUrl, setImageUrl] = useState('');
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [extraImageUrl, setExtraImageUrl] = useState('');
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [isUploadingPlace, setIsUploadingPlace] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState('');
+  const [placeUploadError, setPlaceUploadError] = useState('');
   const [mapEmbedUrl, setMapEmbedUrl] = useState('');
   const [featured, setFeatured] = useState(false);
   const [isDomestic, setIsDomestic] = useState(true);
@@ -112,12 +134,129 @@ export default function PackagesAdminPage() {
   const [excluded, setExcluded] = useState<string[]>([]);
 
   // Input helpers
-  const [newPlaceName, setNewPlaceName] = useState('');
   const [newPlaceImage, setNewPlaceImage] = useState('');
   const [newInclude, setNewInclude] = useState('');
   const [newExclude, setNewExclude] = useState('');
   const [dayTitle, setDayTitle] = useState('');
   const [dayDesc, setDayDesc] = useState('');
+
+  // 1. Cover Image Upload (Device to Cloudinary)
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setCoverUploadError('Please select a valid image file (PNG, JPG, WEBP, AVIF)');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setCoverUploadError('Image size should be less than 10MB');
+      return;
+    }
+
+    setIsUploadingCover(true);
+    setCoverUploadError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'msk_holidays/packages');
+
+      const res = await axios.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data?.success && res.data?.url) {
+        setImageUrl(res.data.url);
+      } else {
+        setCoverUploadError(res.data?.message || 'Failed to upload image');
+      }
+    } catch (err: any) {
+      console.error('Package image upload error:', err);
+      setCoverUploadError(err.response?.data?.message || 'Error uploading image to server');
+    } finally {
+      setIsUploadingCover(false);
+      e.target.value = '';
+    }
+  };
+
+  // 2. Additional Gallery Images Upload
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingGallery(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+        if (file.size > 10 * 1024 * 1024) continue;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'msk_holidays/packages');
+
+        const res = await axios.post('/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        if (res.data?.success && res.data?.url) {
+          setGalleryImages((prev) => [...prev, res.data.url]);
+        }
+      }
+    } catch (err: any) {
+      console.error('Gallery image upload error:', err);
+    } finally {
+      setIsUploadingGallery(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleAddExtraImage = () => {
+    if (!extraImageUrl.trim()) return;
+    setGalleryImages([...galleryImages, extraImageUrl.trim()]);
+    setExtraImageUrl('');
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    setGalleryImages(galleryImages.filter((_, idx) => idx !== index));
+  };
+
+  // 3. Place Photo Upload (Device to Cloudinary)
+  const handlePlaceImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingPlace(true);
+    setPlaceUploadError('');
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+        if (file.size > 10 * 1024 * 1024) continue;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'msk_holidays/packages/places');
+
+        const res = await axios.post('/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        if (res.data?.success && res.data?.url) {
+          setPlacesYouWillSee((prev) => [...prev, { image: res.data.url }]);
+        }
+      }
+    } catch (err: any) {
+      console.error('Place image upload error:', err);
+      setPlaceUploadError(err.response?.data?.message || 'Error uploading image');
+    } finally {
+      setIsUploadingPlace(false);
+      e.target.value = '';
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -147,15 +286,19 @@ export default function PackagesAdminPage() {
     setIsEditing(true);
     setEditId(null);
     setName('');
-    setCategory(categories[0]?.slug || 'kashmir');
+    setCategory(categories[0]?.slug || '');
     setDestinationId(destinations[0]?._id || '');
     setDescription('');
     setDuration('04 Days/ 03 Nights');
     setDurationDays(4);
-    setPrice(18000);
-    setRegularPrice(22000);
+    setPrice(0);
+    setRegularPrice('');
     setRating(5);
-    setImageUrl('https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=1200&q=85');
+    setImageUrl('https://plus.unsplash.com/premium_photo-1663088923485-58685ba14d5f?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    setGalleryImages([]);
+    setExtraImageUrl('');
+    setCoverUploadError('');
+    setPlaceUploadError('');
     setMapEmbedUrl('');
     setFeatured(true);
     setIsDomestic(true);
@@ -173,7 +316,7 @@ export default function PackagesAdminPage() {
       { day: 2, title: 'Day 2- Srinagar: A day excursion to Pahalgam', description: 'Explore scenic saffron fields and Lidder valley.' },
     ]);
     setPlacesYouWillSee([
-      { name: 'Dal Lake & Houseboats', image: 'https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=600&q=80' },
+      { image: 'https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=600&q=80' },
     ]);
     setIncluded([
       'Accommodation in Selected Hotel',
@@ -210,7 +353,11 @@ export default function PackagesAdminPage() {
     setPrice(pkg.price);
     setRegularPrice(pkg.regularPrice || '');
     setRating(pkg.rating);
-    setImageUrl(pkg.images[0] || '');
+    setImageUrl(pkg.images?.[0] || '');
+    setGalleryImages(pkg.images?.slice(1) || []);
+    setExtraImageUrl('');
+    setCoverUploadError('');
+    setPlaceUploadError('');
     setMapEmbedUrl(pkg.mapEmbedUrl || '');
     setFeatured(pkg.featured);
     setIsDomestic(pkg.isDomestic !== false);
@@ -234,6 +381,8 @@ export default function PackagesAdminPage() {
   const handleCloseForm = () => {
     setIsEditing(false);
     setEditId(null);
+    setCoverUploadError('');
+    setPlaceUploadError('');
     setErrorMsg('');
     setSuccessMsg('');
   };
@@ -255,9 +404,8 @@ export default function PackagesAdminPage() {
   };
 
   const handleAddPlace = () => {
-    if (!newPlaceName || !newPlaceImage) return;
-    setPlacesYouWillSee([...placesYouWillSee, { name: newPlaceName, image: newPlaceImage }]);
-    setNewPlaceName('');
+    if (!newPlaceImage.trim()) return;
+    setPlacesYouWillSee([...placesYouWillSee, { image: newPlaceImage.trim() }]);
     setNewPlaceImage('');
   };
 
@@ -287,12 +435,13 @@ export default function PackagesAdminPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !description || !duration || !price || !category) {
-      setErrorMsg('Please enter all required fields.');
+    if (!name || !description || !duration || !category || !imageUrl.trim()) {
+      setErrorMsg('Please select a Category, add a Cover Image, and fill all required fields.');
       return;
     }
 
     const selectedCategoryObj = categories.find((c) => c.slug === category);
+    const allImages = [imageUrl.trim(), ...galleryImages.filter((img) => img && img !== imageUrl.trim())];
 
     const payload = {
       name,
@@ -302,10 +451,10 @@ export default function PackagesAdminPage() {
       description,
       duration,
       durationDays: Number(durationDays),
-      price: Number(price),
+      price: price ? Number(price) : 0,
       regularPrice: regularPrice ? Number(regularPrice) : undefined,
       rating: Number(rating),
-      images: [imageUrl],
+      images: allImages.length > 0 ? allImages : [imageUrl.trim()],
       highlights: {
         travel: hlTravel,
         accommodation: hlAccommodation,
@@ -434,54 +583,72 @@ export default function PackagesAdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Tour Category *
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue font-semibold capitalize"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat.slug}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
+                      Tour Category *
+                    </label>
+                    <Link
+                      href="/admin/dashboard/categories"
+                      target="_blank"
+                      className="text-[11px] font-bold text-primary-blue hover:underline"
+                    >
+                      + Manage Categories
+                    </Link>
+                  </div>
+                  {categories.length === 0 ? (
+                    <div className="p-2.5 rounded-xl border border-amber-200 bg-amber-50 text-xs text-amber-800">
+                      No categories found.{' '}
+                      <Link href="/admin/dashboard/categories" className="font-bold underline text-primary-blue">
+                        Add a category first
+                      </Link>
+                    </div>
+                  ) : (
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue font-semibold capitalize"
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat.slug}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Discounted Price (₹) *
+                    Reference Price (₹) <span className="text-[10px] text-slate-400 font-normal lowercase">(optional)</span>
                   </label>
                   <input
                     type="number"
-                    required
-                    placeholder="18000"
-                    value={price}
-                    onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue font-bold text-green-700"
+                    placeholder="Quote on request"
+                    value={price || ''}
+                    onChange={(e) => setPrice(e.target.value ? Number(e.target.value) : 0)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-700 font-medium"
                   />
                   <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-                    Displayed as &quot;From 18,000 /-&quot;
+                    Clients will send Quote Requests
                   </span>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                    Original Price (₹)
+                    Regular Price (₹) <span className="text-[10px] text-slate-400 font-normal lowercase">(optional)</span>
                   </label>
                   <input
                     type="number"
-                    placeholder="22000"
+                    placeholder="Optional regular price"
                     value={regularPrice}
                     onChange={(e) => setRegularPrice(e.target.value ? Number(e.target.value) : '')}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue font-semibold line-through text-slate-500"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue text-slate-500 font-medium"
                   />
                   <span className="text-[10px] text-slate-400 font-semibold block mt-1">
-                    Crossed-out regular price
+                    Optional reference
                   </span>
                 </div>
 
@@ -513,25 +680,175 @@ export default function PackagesAdminPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-                  Cover Image URL *
-                </label>
-                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {/* Package Cover Image Upload & URL */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Package Cover Image *
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    PNG, JPG, WEBP, AVIF (Max 10MB)
+                  </span>
+                </div>
+
+                {coverUploadError && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-100">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{coverUploadError}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Upload File from Device */}
+                  <div className="relative border-2 border-dashed border-slate-200 hover:border-primary-blue rounded-2xl p-5 transition-all bg-slate-50/60 hover:bg-primary-blue/5 flex flex-col items-center justify-center text-center cursor-pointer min-h-[140px] group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={isUploadingCover}
+                      onChange={handleCoverUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                    />
+                    {isUploadingCover ? (
+                      <div className="flex flex-col items-center gap-2 text-primary-blue">
+                        <Loader2 className="w-7 h-7 animate-spin" />
+                        <span className="text-xs font-bold">Uploading to Cloudinary...</span>
+                        <span className="text-[10px] text-slate-400">Please wait a moment</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 pointer-events-none">
+                        <div className="w-10 h-10 rounded-full bg-primary-blue/10 text-primary-blue flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <UploadCloud className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-primary-blue block">
+                            Upload Image from Device
+                          </span>
+                          <span className="text-[11px] text-slate-400 block mt-0.5">
+                            Click to browse or drop cover image here
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Or Paste Direct Image URL */}
+                  <div className="flex flex-col justify-between p-4 rounded-2xl border border-slate-200 bg-white shadow-xs">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+                        Or Paste Image URL
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/photo-..."
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary-blue text-slate-700 font-medium"
+                      />
+                    </div>
+
+                    {imageUrl ? (
+                      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-100">
+                        <div className="relative w-16 h-12 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100 shadow-xs">
+                          <Image src={imageUrl} alt="Package cover preview" fill className="object-cover" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-bold">
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                            <span>Cover Image Attached</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 truncate block mt-0.5" title={imageUrl}>
+                            {imageUrl}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setImageUrl('')}
+                          className="text-slate-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Remove cover image"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-slate-400 italic mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-slate-300" />
+                        No cover image uploaded or entered yet
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Gallery Photos (Optional) */}
+              <div className="space-y-3 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
+                      Additional Gallery Images <span className="text-[10px] text-slate-400 font-normal lowercase">(optional)</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400">
+                      Upload multiple gallery photos or paste links
+                    </span>
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold cursor-pointer transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={isUploadingGallery}
+                      onChange={handleGalleryUpload}
+                      className="hidden"
+                    />
+                    {isUploadingGallery ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary-blue" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-3.5 h-3.5 text-primary-blue" />
+                        <span>Upload Photos</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+
+                <div className="flex gap-2">
                   <input
                     type="url"
-                    required
-                    placeholder="https://images.unsplash.com/photo-..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="flex-1 w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-primary-blue"
+                    placeholder="Or paste extra photo URL and click Add"
+                    value={extraImageUrl}
+                    onChange={(e) => setExtraImageUrl(e.target.value)}
+                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary-blue text-slate-700"
                   />
-                  {imageUrl && (
-                    <div className="relative w-28 h-16 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
-                      <Image src={imageUrl} alt="Cover preview" fill className="object-cover" />
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleAddExtraImage}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Add URL
+                  </button>
                 </div>
+
+                {galleryImages.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
+                    {galleryImages.map((img, idx) => (
+                      <div key={idx} className="relative rounded-xl overflow-hidden border border-slate-200 group bg-slate-100 shadow-2xs">
+                        <div className="relative h-20 w-full">
+                          <Image src={img} alt={`Gallery photo ${idx + 1}`} fill className="object-cover" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGalleryImage(idx)}
+                          className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                          title="Remove image"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -637,52 +954,92 @@ export default function PackagesAdminPage() {
 
             {/* Section 3: Places You'll See Gallery */}
             <div className="space-y-4 pt-6 border-t border-slate-100">
-              <h3 className="text-sm font-black text-primary-blue uppercase tracking-wider">
-                3. &quot;Places You&apos;ll See&quot; Gallery Photos
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  placeholder="Place Name (e.g. Khardungla Top, Dal Lake)"
-                  value={newPlaceName}
-                  onChange={(e) => setNewPlaceName(e.target.value)}
-                  className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-xs"
-                />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-black text-primary-blue uppercase tracking-wider">
+                    3. &quot;Places You&apos;ll See&quot; Gallery Photos
+                  </h3>
+                  <span className="text-[11px] text-slate-400">
+                    Add photos of destinations &amp; attractions travelers will see (Image only)
+                  </span>
+                </div>
+
+                <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-blue/10 hover:bg-primary-blue/15 text-primary-blue text-xs font-bold cursor-pointer transition-colors shrink-0 w-fit">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={isUploadingPlace}
+                    onChange={handlePlaceImageUpload}
+                    className="hidden"
+                  />
+                  {isUploadingPlace ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Uploading to Cloudinary...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-4 h-4" />
+                      <span>Upload Photos from Device</span>
+                    </>
+                  )}
+                </label>
+              </div>
+
+              {placeUploadError && (
+                <div className="flex items-center gap-2 p-2.5 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-100">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{placeUploadError}</span>
+                </div>
+              )}
+
+              {/* Paste Direct URL */}
+              <div className="flex gap-2">
                 <input
                   type="url"
-                  placeholder="Place Image URL"
+                  placeholder="Or paste place photo URL (e.g. https://images.unsplash.com/...)"
                   value={newPlaceImage}
                   onChange={(e) => setNewPlaceImage(e.target.value)}
-                  className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-xs"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary-blue bg-white"
                 />
                 <button
                   type="button"
                   onClick={handleAddPlace}
-                  className="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold shrink-0"
+                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
                 >
-                  Add Place
+                  Add Photo
                 </button>
               </div>
 
-              {placesYouWillSee.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+              {/* Photos Gallery Grid */}
+              {placesYouWillSee.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
                   {placesYouWillSee.map((place, idx) => (
-                    <div key={idx} className="relative rounded-2xl overflow-hidden border border-slate-200 group">
-                      <div className="relative h-28 w-full">
-                        <Image src={place.image} alt={place.name} fill className="object-cover" />
-                      </div>
-                      <div className="p-2 bg-white flex items-center justify-between text-xs">
-                        <span className="font-bold text-slate-700 truncate">{place.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePlace(idx)}
-                          className="text-red-500 hover:text-red-700 font-bold ml-1"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                    <div
+                      key={idx}
+                      className="relative rounded-2xl overflow-hidden border border-slate-200 group bg-slate-100 shadow-2xs aspect-4/3"
+                    >
+                      <Image
+                        src={place.image}
+                        alt={`Place photo ${idx + 1}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePlace(idx)}
+                        className="absolute top-1.5 right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-md cursor-pointer"
+                        title="Remove photo"
+                      >
+                        ✕
+                      </button>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400">
+                  No places gallery photos added yet. Upload from device or paste image URLs above.
                 </div>
               )}
             </div>
@@ -925,7 +1282,7 @@ export default function PackagesAdminPage() {
                   <th className="py-3 px-4">Tour</th>
                   <th className="py-3 px-4">Category</th>
                   <th className="py-3 px-4">Duration</th>
-                  <th className="py-3 px-4">Price</th>
+                  <th className="py-3 px-4">Pricing / Quote</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
@@ -951,14 +1308,14 @@ export default function PackagesAdminPage() {
                     </td>
                     <td className="py-3 px-4 font-medium">{pkg.duration}</td>
                     <td className="py-3 px-4">
-                      <span className="font-extrabold text-green-700 text-sm">
-                        ₹{pkg.price.toLocaleString('en-IN')}
+                      <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-primary-blue border border-blue-200">
+                        Quote on Request
                       </span>
-                      {pkg.regularPrice && (
-                        <span className="text-[10px] line-through text-slate-400 ml-1.5 font-medium">
-                          ₹{pkg.regularPrice.toLocaleString('en-IN')}
+                      {pkg.price && pkg.price > 0 ? (
+                        <span className="text-[10px] text-slate-400 block mt-0.5 font-medium">
+                          Ref: ₹{pkg.price.toLocaleString('en-IN')}
                         </span>
-                      )}
+                      ) : null}
                     </td>
                     <td className="py-3 px-4">
                       <span

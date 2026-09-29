@@ -37,7 +37,7 @@ interface ItineraryItem {
 }
 
 interface PlaceYouWillSee {
-  name: string;
+  name?: string;
   image: string;
 }
 
@@ -47,7 +47,7 @@ interface PackageData {
   slug: string;
   description: string;
   duration: string;
-  price: number;
+  price?: number;
   regularPrice?: number;
   rating: number;
   images: string[];
@@ -264,7 +264,7 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
             {/* Quotation Box */}
             <div className="lg:col-span-4 bg-white/95 backdrop-blur-md rounded-2xl p-6 text-slate-800 shadow-2xl border border-white">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Tour Pricing
+                Tour Quotation
               </span>
               <div className="my-2">
                 <span className="text-xl sm:text-2xl font-black text-primary-blue tracking-tight block">
@@ -454,11 +454,20 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
                       carouselIndex === idx ? 'border-primary-blue scale-[0.98]' : 'border-transparent'
                     }`}
                   >
-                    <Image src={place.image} alt={place.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                    <span className="absolute bottom-2 left-2 right-2 text-white text-[11px] font-bold line-clamp-1 drop-shadow-sm">
-                      {place.name}
-                    </span>
+                    <Image
+                      src={place.image}
+                      alt={place.name || `Place photo ${idx + 1}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {place.name ? (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                        <span className="absolute bottom-2 left-2 right-2 text-white text-[11px] font-bold line-clamp-1 drop-shadow-sm">
+                          {place.name}
+                        </span>
+                      </>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -610,16 +619,16 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
             >
               <div>
                 <span className="text-[11px] font-black uppercase tracking-wider text-green-600 block mb-1">
-                  Exclusive Offer
+                  Custom Quote Request
                 </span>
                 <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-snug">
-                  Hurry! Up to 30% Off on Unforgettable Travel Experiences!
+                  Request a Free Personalized Quote for This Tour!
                 </h3>
               </div>
 
               {submitStatus === 'success' && (
                 <div className="p-4 bg-green-50 text-green-700 rounded-2xl text-xs font-bold border border-green-200">
-                  ✓ Thank you! Our travel expert will contact you shortly with discount details.
+                  ✓ Thank you! Our travel expert will contact you shortly with your customized quote.
                 </div>
               )}
 
@@ -682,7 +691,7 @@ export default function PackageDetailClient({ pkg }: { pkg: PackageData }) {
                   className="w-full py-3.5 px-6 bg-[#6bc400] hover:bg-[#5eb000] text-white font-black text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
                 >
                   <Send className="w-4 h-4" />
-                  {isSubmitting ? 'Sending...' : 'Send'}
+                  {isSubmitting ? 'Sending Request...' : 'Send Quote Request'}
                 </button>
               </form>
 

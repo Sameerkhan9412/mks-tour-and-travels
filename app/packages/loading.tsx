@@ -20,7 +20,7 @@ export default function PackagesLoading() {
           <div className="lg:col-span-1 space-y-6 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm h-fit">
             <div className="h-6 w-24 bg-slate-200 rounded-md animate-pulse mb-6" />
             <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3].map((i) => (
                 <div key={i} className="space-y-2">
                   <div className="h-3 w-16 bg-slate-200 rounded animate-pulse" />
                   <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />

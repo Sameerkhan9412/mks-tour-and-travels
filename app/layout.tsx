@@ -4,6 +4,10 @@ import './globals.css';
 import ClientProvider from '@/components/client-provider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { connectToDatabase } from '@/lib/db';
+import Category from '@/models/Category';
+
+export const dynamic = 'force-dynamic';
 
 const outfit = Outfit({
   variable: '--font-outfit',
@@ -35,20 +39,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let categories: any[] = [];
+  try {
+    await connectToDatabase();
+    categories = await Category.find().sort({ order: 1, name: 1 }).lean();
+  } catch (error) {
+    console.error('Failed to fetch categories in layout:', error);
+  }
+
+  const cleanCategories = JSON.parse(JSON.stringify(categories));
+
   return (
     <html lang="en">
       <body className={`${outfit.variable} ${inter.variable} font-sans antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col`}>
         <ClientProvider>
-          <Header />
+          <Header initialCategories={cleanCategories} />
           <main className="flex-1 pt-20">
             {children}
           </main>
-          <Footer />
+          <Footer categories={cleanCategories} />
         </ClientProvider>
       </body>
     </html>

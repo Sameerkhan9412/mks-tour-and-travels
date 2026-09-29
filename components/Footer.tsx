@@ -4,18 +4,33 @@ import React from 'react';
 import Link from 'next/link';
 import { Globe, Mail, Phone, MapPin, Send } from 'lucide-react';
 
-export default function Footer() {
+interface FooterCategoryItem {
+  name: string;
+  slug: string;
+}
+
+interface FooterProps {
+  categories?: FooterCategoryItem[];
+}
+
+export default function Footer({ categories = [] }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
-  const destinations = [
-    { name: 'Uttarakhand', href: '/packages?category=uttarakhand' },
-    { name: 'Kashmir', href: '/packages?category=kashmir' },
-    { name: 'Himachal Pradesh', href: '/packages?category=himachal-pradesh' },
-    { name: 'Goa', href: '/packages?category=goa' },
-    { name: 'Rajasthan', href: '/packages?category=rajasthan' },
-    { name: 'Ladakh', href: '/packages?category=ladakh' },
-    { name: 'Kerala', href: '/packages?category=kerala' },
-  ];
+  const tourCategories =
+    categories && categories.length > 0
+      ? categories.slice(0, 8).map((cat) => ({
+          name: cat.name,
+          href: `/packages?category=${cat.slug}`,
+        }))
+      : [
+          { name: 'Uttarakhand', href: '/packages?category=uttarakhand' },
+          { name: 'Kashmir', href: '/packages?category=kashmir' },
+          { name: 'Himachal Pradesh', href: '/packages?category=himachal-pradesh' },
+          { name: 'Goa', href: '/packages?category=goa' },
+          { name: 'Rajasthan', href: '/packages?category=rajasthan' },
+          { name: 'Ladakh', href: '/packages?category=ladakh' },
+          { name: 'Kerala', href: '/packages?category=kerala' },
+        ];
 
   const quickLinks = [
     { name: 'Home', href: '/' },
@@ -104,13 +119,13 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Popular Destinations */}
+          {/* Tour Categories */}
           <div>
             <h4 className="text-white font-semibold text-sm tracking-widest uppercase mb-6 relative after:content-[''] after:absolute after:bottom-[-6px] after:left-0 after:w-10 after:h-0.5 after:bg-accent-gold">
-              Destinations
+              Tour Categories
             </h4>
             <ul className="space-y-3 text-sm">
-              {destinations.map((link) => (
+              {tourCategories.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}

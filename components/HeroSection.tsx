@@ -8,22 +8,22 @@ import axios from 'axios';
 
 const heroSlides = [
   {
-    image: 'https://images.unsplash.com/photo-1595815729819-bf9c51f62b8a?auto=format&fit=crop&w=1920&q=85',
+    image: 'https://images.unsplash.com/photo-1715457573748-8e8a70b2c1be?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     title: 'Kashmir: Paradise on Earth',
     subtitle: 'Sail on the pristine Dal Lake and breathe the fresh mountain air of Gulmarg.',
   },
   {
-    image: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1920&q=85',
+    image: 'https://plus.unsplash.com/premium_photo-1661962344178-19930ba15492?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     title: 'Spiti & Ladakh High Passes',
     subtitle: 'Traverse dramatic cold deserts, ancient cliff monasteries, and crystalline lakes.',
   },
   {
-    image: 'https://images.unsplash.com/photo-1602216056096-3c40cc0c9944?auto=format&fit=crop&w=1920&q=85',
+    image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     title: 'Kerala: God’s Own Country',
     subtitle: 'Unwind in tranquil backwater houseboats and lush misty tea hills of Munnar.',
   },
   {
-    image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1920&q=85',
+    image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     title: 'Royal Rajasthan Heritage',
     subtitle: 'Step into legendary maharajah palaces, mighty desert hill forts, and golden sands.',
   },

@@ -7,6 +7,10 @@ import Category from '@/models/Category';
 import PackageCard from '@/components/PackageCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import { Compass, AlertCircle } from 'lucide-react';
+import { fetchCategoriesFromApi } from '@/lib/api/categories';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface PackagesPageProps {
   searchParams: Promise<{
@@ -94,16 +98,17 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
   const _registerModels = [Destination.modelName, Hotel.modelName, Category.modelName];
 
   let destinationsList: any[] = [];
+  let categoriesList: any[] = [];
   let packagesList: any[] = [];
 
   const resolvedParams = await searchParams;
   const { destination, category, duration, domestic, sort } = resolvedParams;
 
   try {
-    await connectToDatabase();
+    // Fetch dynamic categories from /api/categories API endpoint
+    categoriesList = await fetchCategoriesFromApi();
 
-    // Fetch destinations for filter select dropdown
-    destinationsList = await Destination.find({}, 'name slug').sort({ name: 1 }).lean();
+    await connectToDatabase();
 
     const query: any = {};
 
@@ -172,7 +177,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
 
   // Cast lean outputs to simple structures
   let cleanPackages = JSON.parse(JSON.stringify(packagesList));
-  const cleanDestinations = JSON.parse(JSON.stringify(destinationsList));
+  const cleanCategories = JSON.parse(JSON.stringify(categoriesList));
 
   // Fallback if DB is empty and user is browsing
   if (cleanPackages.length === 0 && !destination && (!category || category === 'all')) {
@@ -208,7 +213,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Filters Sidebar */}
           <aside className="lg:col-span-4">
-            <FilterSidebar destinationsList={cleanDestinations} />
+            <FilterSidebar categoriesList={cleanCategories} />
           </aside>
 
           {/* Packages Listing Section */}
@@ -231,7 +236,7 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
                 </div>
                 <h3 className="text-lg font-bold text-slate-800">No Packages Match Your Filters</h3>
                 <p className="text-xs text-slate-500 max-w-md mx-auto">
-                  Try adjusting your selected category, price range, or duration to explore other available Indian tours.
+                  Try adjusting your selected category or duration to explore other available Indian tours.
                 </p>
               </div>
             ) : (

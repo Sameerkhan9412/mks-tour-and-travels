@@ -3,6 +3,9 @@ import { connectToDatabase } from '@/lib/db';
 import Category from '@/models/Category';
 import { getSessionUser } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();

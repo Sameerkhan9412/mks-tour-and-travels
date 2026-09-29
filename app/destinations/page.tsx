@@ -18,7 +18,8 @@ export default async function DestinationsPage() {
 
   try {
     await connectToDatabase();
-    destinations = await Destination.find().sort({ name: 1 }).lean();
+    const rawDestinations = await Destination.find().sort({ name: 1 }).lean();
+    destinations = JSON.parse(JSON.stringify(rawDestinations));
   } catch (error) {
     console.error('Database fetch error in destinations list, using mock data:', error);
   }

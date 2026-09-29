@@ -16,7 +16,7 @@ export interface IItineraryItem {
 }
 
 export interface IPlaceYouWillSee {
-  name: string;
+  name?: string;
   image: string;
 }
 
@@ -36,7 +36,7 @@ export interface IPackage extends Document {
   description: string;
   duration: string; // e.g. "4 Days / 3 Nights"
   durationDays: number; // e.g. 4
-  price: number; // Current/Discounted price e.g. 18000
+  price?: number; // Optional price (quotes on request)
   regularPrice?: number; // Crossed out original price e.g. 22000
   rating: number;
   images: string[];
@@ -65,7 +65,7 @@ const ItineraryItemSchema = new Schema<IItineraryItem>({
 });
 
 const PlaceYouWillSeeSchema = new Schema<IPlaceYouWillSee>({
-  name: { type: String, required: true },
+  name: { type: String, default: '' },
   image: { type: String, required: true },
 });
 
@@ -86,7 +86,7 @@ const PackageSchema: Schema<IPackage> = new Schema(
     description: { type: String, required: true },
     duration: { type: String, required: true },
     durationDays: { type: Number, required: true, min: 1 },
-    price: { type: Number, required: true, min: 0 },
+    price: { type: Number, default: 0, min: 0 },
     regularPrice: { type: Number, min: 0 },
     rating: { type: Number, required: true, min: 1, max: 5, default: 5 },
     images: [{ type: String, required: true }],
