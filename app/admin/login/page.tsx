@@ -10,7 +10,7 @@ import { Globe, Lock, Mail, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = zod.object({
   email: zod.string().min(1, 'Please enter your username or email address'),
-  password: zod.string().min(6, 'Password must be at least 6 characters'),
+  password: zod.string().min(1, 'Please enter your password'),
 });
 
 type LoginFormValues = zod.infer<typeof loginSchema>;
